@@ -3,7 +3,6 @@ SUBTITLE: Configuration for emacs
 #+AUTHOR: Rachit Kumar Verma
 #+DATE:<2026-02-09 Mon>
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
-#+STARTUP: overview
 #+auto_tangle: t
 
 * Introduction
@@ -16,26 +15,71 @@ Here is some basic set up.
 
 The [[https://github.com/magnars/dash.el][dash]] library is required by a lot of packages.
 #+begin_src emacs-lisp
- 
- (use-package dash
-    :init
-    (global-dash-fontify-mode))
-  
+
+  ;; -*- lexical-binding: t; -*-
+
+  (use-package dash
+     :init
+     (global-dash-fontify-mode))
+   
+#+end_src
+
+** Backup Directory
+
+By Default random backup files are generated all through out the work directory. We can change it by using this.
+
+#+begin_src emacs-lisp
+
+  (let ((backup-dir (expand-file-name "backups/" user-emacs-directory))
+        (autosave-dir (expand-file-name "auto-saves/" user-emacs-directory)))
+
+    (make-directory backup-dir t)
+    (make-directory autosave-dir t)
+        
+  ;; Backups
+  (setq backup-directory-alist
+        `(("." . ,backup-dir))
+        backup-by-copying t
+        delete-old-versions t
+        kept-new-versions 10
+        kept-old-versions 5
+        version-control t)
+
+  ;; Auto-saves
+  (setq auto-save-file-name-transforms
+        `((".*" ,autosave-dir t))))
+
 #+end_src
 
 * Basic UI Configuration
 
-#+begin_src emacs-lisp
+** Early Init
 
-  (setq inhibit-startup-message t)
-  (scroll-bar-mode -1)
+This goes to [[file:early-init.el][early-init.el]] file.
+
+#+begin_src emacs-lisp :tangle ./early-init.el :mkdirp yes
+  
   (tool-bar-mode -1)
   (tooltip-mode -1)
-  (set-fringe-mode 10)
   (menu-bar-mode -1)
 
-  (setq visible-bell t)
+  (setq frame-inhibit-implied-resize t)
 
+  (setq default-frame-alist
+        '((font . "Maple Mono NF-12")))
+
+#+end_src
+
+** Other Basics
+
+#+begin_src emacs-lisp
+
+  (scroll-bar-mode -1)
+  (setq inhibit-startup-message t)
+  (setq visible-bell t)
+  (fringe-mode 0)
+
+  ;; Use Relative Line Numbers
   (column-number-mode)
   (setq display-line-numbers-type 'relative)
   (global-display-line-numbers-mode t)
@@ -58,8 +102,8 @@ The [[https://github.com/magnars/dash.el][dash]] library is required by a lot of
 
   ;; Add frame borders and window dividers
   (modify-all-frames-parameters
-   '((right-divider-width . 40)
-     (internal-border-width . 40)))
+   '((right-divider-width . 20)
+     (internal-border-width . 20)))
   (dolist (face '(window-divider
                   window-divider-first-pixel
                   window-divider-last-pixel))
@@ -77,9 +121,30 @@ The [[https://github.com/magnars/dash.el][dash]] library is required by a lot of
 
 ** Font Configuration
 
-Configure font sizes and types. Taken from [[https://systemcrafters.net/emacs-tips/using-the-emacs-daemon/][System Crafter's]] Emacs daemon mode configuration.
+In emacsclient, the fonts need to be loaded based on frames.
 
 #+begin_src emacs-lisp
+
+  (defun my/frame-face-setup (frame)
+    (with-selected-frame frame
+      (set-face-attribute 'fixed-pitch frame
+                          :family "Maple Mono NF"
+                          :height 1.0)
+
+      (set-face-attribute 'variable-pitch frame
+                          :family "Cantarell"
+                          :height 1.14
+                          :weight 'regular)))
+
+  (add-hook 'after-make-frame-functions #'my/frame-face-setup)
+
+
+#+end_src
+
+
+Configure font sizes and types. Taken from [[https://systemcrafters.net/emacs-tips/using-the-emacs-daemon/][System Crafter's]] Emacs daemon mode configuration as a fallback.
+
+#+begin_src emacs-lisp :tangle no
 
     (defun my/set-font-faces ()
       (message "Set Font Faces!")
@@ -130,15 +195,13 @@ Configure font sizes and types. Taken from [[https://systemcrafters.net/emacs-ti
 * Advanced UI Configuration
 
 ** Nerd Icons setup
+
 #+begin_src emacs-lisp
 
   ;; General usage
   (use-package nerd-icons)
 
-  ;; use with dired 
-  (use-package nerd-icons-dired
-    :hook
-    (dired-mode . nerd-icons-dired-mode))
+  
 
   ;; Use in ibuffer
   (use-package nerd-icons-ibuffer
@@ -153,14 +216,64 @@ Configure font sizes and types. Taken from [[https://systemcrafters.net/emacs-ti
 
 #+end_src
 
+** Dired
+#+begin_src emacs-lisp
+
+  ;; use nerd fonts with dired 
+  (use-package nerd-icons-dired
+    :hook
+    (dired-mode . nerd-icons-dired-mode))
+
+  (use-package dired
+    :ensure nil
+    :config
+    ;; Let dired guess copy/move destinations
+    (setq dired-dwim-target t)
+    
+    ;; 1. better listing format
+    (setq dired-listing-switches "-alh --group-directories-first")
+
+    ;; 2. Auto revert when files change
+    (setq global-auto-revert-non-file-buffers t)
+    (setq auto-revert-verbose nil)
+    (add-hook 'dired-mode-hook #'auto-revert-mode)
+
+    ;; 3. Reuse same buffer instead of creating new ones
+    (put 'dired-find-alternate-file 'disabled nil)
+    (define-key dired-mode-map (kbd "RET") #'dired-find-alternate-file)
+    (define-key dired-mode-map (kbd "^")
+  	      (lambda ()
+  		(interactive)
+  		(find-alternate-file "..")))
+
+    ;; 4. Hide details by default
+    (add-hook 'dired-mode-hook #'dired-hide-details-mode)
+
+    ;; 5. Recursive operations without confirmation spam
+    (setq dired-recursive-copies 'always)
+    (setq dired-recursive-deletes 'top))
+
+#+end_src
+
+*** Dired subtree
+#+begin_src emacs-lisp
+
+  (use-package dired-subtree
+    :after dired
+    :bind (:map dired-mode-map
+                ("TAB" . dired-subtree-toggle)))
+
+
+#+end_src
+
 ** Doom Modeline
 #+begin_src emacs-lisp
 
   (use-package doom-modeline
     :custom
     (doom-modeline-hud t)
-    (doom-modeline-minor-modes t)
-    (doom-modeline-enable-word-count t)
+    (doom-modeline-major-mode-color-icon t)
+    
     :init
     (doom-modeline-mode 1))
 
@@ -288,6 +401,17 @@ Pulse the cursor using the [[https://protesilaos.com/emacs/pulsar][pulsar]] pack
           
 #+end_src
 
+** Pretty Info
+
+Info mode by default looks arcane. Use[[https://github.com/ubolonton/info-colors][ info-colors]] for prettifying it a bit.
+
+#+begin_src emacs-lisp
+
+  (use-package info-colors
+    :hook (Info-selection . info-colors-fontify-node))
+    
+#+end_src
+
 * Keep Folders Clean
 [[https://github.com/emacscollective/no-littering.git][no-littering]] is currently not downloading in NixOS. IDK Why.
 #+begin_src emacs-lisp
@@ -299,7 +423,9 @@ Pulse the cursor using the [[https://protesilaos.com/emacs/pulsar][pulsar]] pack
 * Org Mode
 
 ** Basic Setup
+
 A basic setup of org-mode.
+
 #+begin_src  emacs-lisp
 
   (defun my/org-mode-setup ()
@@ -321,16 +447,16 @@ A basic setup of org-mode.
 
     ;; Make the document title a bit bigger
     (set-face-attribute 'org-document-title nil :font "Cantarell" :weight
-  		      'bold :height 1.8)
+      		      'bold :height 1.8)
     (require 'org-indent)
     (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
     (set-face-attribute 'org-block nil            :foreground 'unspecified :inherit
-  		      'fixed-pitch :height 0.85)
+      		      'fixed-pitch :height 0.85)
     (set-face-attribute 'org-code nil             :inherit '(shadow fixed-pitch) :height 0.85)
     (set-face-attribute 'org-indent nil           :inherit '(org-hide fixed-pitch) :height 0.85)
     (set-face-attribute 'org-verbatim nil         :inherit '(shadow fixed-pitch) :height 0.85)
     (set-face-attribute 'org-special-keyword nil  :inherit '(font-lock-comment-face
-  							   fixed-pitch))
+      							   fixed-pitch))
     (set-face-attribute 'org-meta-line nil        :inherit '(font-lock-comment-face fixed-pitch))
     (set-face-attribute 'org-checkbox nil         :inherit 'fixed-pitch))
 
@@ -353,12 +479,56 @@ A basic setup of org-mode.
     ;; Enable org templates
     (require 'org-tempo)
     (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
-    (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp")))
+    (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+    
+
+    ;; Configuring org-capture
+
+    ;; First set the default org notes directory
+    (setq org-directory "~/org"
+      	org-default-notes-file (expand-file-name "tasks.org" org-directory))
+    (setq org-log-done 'time)
+    (setq org-log-into-drawer t)
+
+    (setq org-refile-targets
+  	'(("archive.org" :maxlevel . 1)
+  	  ("tasks.org" :maxlevel . 1)))
+
+    ;; Save org buffers after refiling
+    (advice-add 'org-refile
+  	      :after 'org-save-all-org-buffers)
+    
+    (setq org-capture-templates
+  	'(("t" "Tasks / Projects")
+  	  ("tt" "Task" entry
+             (file+headline "tasks.org" "Inbox")
+             "* TODO %?\n  %U\n %a\n %i" :empty-lines 1)
+
+  	  ("j" "Journal Entries")
+            ("jj" "Journal" entry
+             (file+olp+datetree "~/org/journal.org")
+             "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
+             ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
+             :clock-in :clock-resume
+             :empty-lines 1)))
+
+    (defun my/org-capture-task ()
+      (interactive)
+      (org-capture nil "tt"))
+
+    (defun my/org-capture-journal ()
+      (interactive)
+      (org-capture nil "jj"))
+
+    (keymap-global-set "C-c t" #'my/org-capture-task)
+    (keymap-global-set "C-c j" #'my/org-capture-journal))
 
 #+end_src
     
 ** Org Modern Setup
+
 This is [[https://github.com/rachitve6h2g/org-modern][org-modern]] for pretifying your org file setup.
+
 #+begin_src emacs-lisp
 
   (use-package org-modern
@@ -392,6 +562,7 @@ This is [[https://github.com/rachitve6h2g/org-modern][org-modern]] for pretifyin
 ** Org Auto Tangle
 
 Use auto tangle using [[https://github.com/yilkalargaw/org-auto-tangle][org-auto-tangle]] package. Just set =auto_tangle: t= as the header, and you're set.
+
 #+begin_src emacs-lisp
 
   (use-package org-auto-tangle
@@ -403,19 +574,8 @@ Use auto tangle using [[https://github.com/yilkalargaw/org-auto-tangle][org-auto
 
 ** Center Org Buffers
 
-#+begin_src emacs-lisp :tangle no
-
-  (use-package visual-fill-column
-    :custom
-    (visual-fill-column-width 110)
-    (visual-fill-column-center-text t)
-    :hook
-    (org-mode . visual-fill-column-mode)
-    (visual-line-mode . #'visual-fill-column-for-vline))
-
-#+end_src
-
-Or use olivetti:
+ Use olivetti:
+ 
 #+begin_src emacs-lisp
 
   (use-package olivetti
@@ -427,36 +587,34 @@ Or use olivetti:
 ** Babel Languages
 
 Babel languages make writing code blocks easier.
+
 #+begin_src emacs-lisp
 
   (with-eval-after-load 'org
     (org-babel-do-load-languages
      'org-babel-load-languages
-     '((emacs-lisp . t))))
-  
+     '((emacs-lisp . t)
+       (C . t))))
+
 #+end_src
 
-** Org Journal
-Use [[https://github.com/bastibe/org-journal][org-journal]] for journaling.
+** Org Roam (My Second Brain)
+
 #+begin_src emacs-lisp
 
-    (use-package org-journal
-      :defer t
-      :init
-      (setq org-journal-prefix-key "C-c j")
-      
-      :config
-      (setq org-journal-dir "~/Documents/Journals/"
-    	org-journal-date-format "%A, %d %B %Y"
-  	org-journal-file-type 'yearly)
-      
-      ;; Add org-journal-dir to org-agenda-files
-      (add-to-list 'org-agenda-files org-journal-dir))
+  (use-package org-roam
+    :custom
+    (org-roam-directory (file-truename "~/org"))
+    (org-roam-completion-everywhere t)
+    :config
+    (org-roam-db-autosync-mode))
 
 #+end_src
 
 * Superior Window Switching
+
 Ace windows using[[https://github.com/abo-abo/ace-window][ ace-window]] package for superior window switching method.
+
 #+begin_src emacs-lisp
 
   (use-package ace-window
@@ -465,7 +623,9 @@ Ace windows using[[https://github.com/abo-abo/ace-window][ ace-window]] package 
 #+end_src
 
 * Terminal in Emacs
+
 Use [[https://github.com/akermu/emacs-libvterm][emacs-libvterm]] package to use terminal inside Emacs. Use =C-v= keymap to open vterm in emacs.
+
 #+begin_src emacs-lisp
 
   (use-package vterm)
@@ -473,6 +633,7 @@ Use [[https://github.com/akermu/emacs-libvterm][emacs-libvterm]] package to use 
       #+end_src
 
 ** Multiple Vterm Buffers
+
 #+begin_src emacs-lisp
 
   ;; Use Multi vterm to create multiple vterm buffers
@@ -483,7 +644,9 @@ Use [[https://github.com/akermu/emacs-libvterm][emacs-libvterm]] package to use 
 #+end_src
 
 ** Toggle Vterm with Ease
+
 Use the keychord =C-c v= to toggle vterm using the [[https://github.com/jixiuf/vterm-toggle][vterm-toggle]] package.
+
 #+begin_src emacs-lisp
 
     (use-package vterm-toggle
@@ -550,7 +713,7 @@ Highlight todo keywords in magit.
 
   (use-package projectile
     :init
-    (projectile-mode +1)
+    (projectile-mode 1)
     
     :custom
     (projectile-project-search-path '("~/Development/" "~/nixdots/"))
@@ -626,7 +789,7 @@ Set up auto-completion for programming languages. This configuration is taken fr
 
   (use-package cape
     ;; Bind prefix keymap providing all Cape commands under a menmonic key.
-    :bind ("C-c c" . cape-prefix-map)
+    :bind ("C-x c" . cape-prefix-map)
     :init
     ;; Add to the global default value of `completion-at-point-functions' which is
     ;; used by `completion-at-point'.  The order of the functions matters, the
@@ -924,11 +1087,21 @@ Save the last visited page in pdf-view using [[https://github.com/nicolaisingh/s
 #+end_src
 
 Use the new [[https://codeberg.org/MonadicSheep/emacs-reader][emacs-reader]] package which uses the =mupdf= backend instead of =poppler= backend.
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 
-      (use-package reader
-        :hook
-        (reader-mode . (lambda () (display-line-numbers-mode -1))))
+  (use-package reader
+    :commands
+    (reader-mode)
+    :hook
+    (reader-mode . (lambda () (display-line-numbers-mode -1))))
+
+
+  ;; The new version is still expecting a function that it does not provide.
+  (with-eval-after-load 'reader
+   (unless (fboundp 'reader-current-doc-pagenumber)
+      (defalias 'reader-current-doc-pagenumber
+        #'reader-dyn--current-doc-pagenumber)))
+
 
 #+end_src
 
@@ -942,9 +1115,20 @@ Use the new [[https://codeberg.org/MonadicSheep/emacs-reader][emacs-reader]] pac
       
     #+end_src
 
-* Elfeed Setup
-Elfeed is a rss reader for emacs. 
-** 
+* TODO Elfeed Setup
+Elfeed is a rss reader for emacs.
+
+*  Music Listening
+[[https://github.com/emacsmirror/emms][Emms]] (Emacs Multi-Media System) is a system to listen to music.
+#+begin_src emacs-lisp :
+
+  (use-package emms
+    :init (emms-all)
+    :config
+    (setq emms-player-list '(emms-player-mpv)
+  	emms-info-functions '(emms-info-native)))
+
+#+end_src
 
 * TODO Tasks
 - [ ] Refine the config. There's a lot of stuff that needs to be cleaned up and set properly.

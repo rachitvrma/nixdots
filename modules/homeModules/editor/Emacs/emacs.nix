@@ -2,14 +2,18 @@
   flake.homeModules.emacs =
     { pkgs, config, ... }:
     {
-      stylix.targets.emacs = {
-        opacity.override = rec {
-          applications = 0.95;
-          desktop = applications;
-        };
+      stylix = {
+        targets.emacs = {
+          enable = true;
 
-        fonts.override = {
-          applications = 11;
+          opacity.override = {
+            applications = 0.89;
+            desktop = 0.89;
+          };
+
+          fonts.override = {
+            applications = 11;
+          };
         };
       };
 
@@ -24,6 +28,7 @@
         # poppler # For pdf reading
 
         shfmt # for formatting bash
+        mupdf
 
         # Emacsclient needs to be restarted after every rebuild
         (pkgs.writeShellScriptBin "remacs" ''
@@ -65,6 +70,7 @@
               dash # It's a library that's needed by emacs for a lot of things
               dashboard
               diff-hl
+              dired-subtree
               doom-modeline
               elfeed
               elfeed-dashboard
@@ -78,7 +84,8 @@
               eshell-vterm
               exec-path-from-shell
               forge
-              hl-todo
+              hl-todo # Highlight the TODO keywords in a lot of buffers
+              info-colors # Prettify info mode
               json-mode
               ligature
               lsp-mode
@@ -103,9 +110,6 @@
               org
               org-auto-tangle
               org-dashboard
-              org-journal
-              org-journal-list
-              org-journal-tags
               org-modern
 
               (callPackage ./packages/_org-modern-indent.nix {
@@ -113,19 +117,17 @@
                 inherit (epkgs) melpaBuild;
               })
 
-              /*
-                (callPackage ./packages/_emacs-reader.nix {
-                  inherit (pkgs)
-                    fetchFromGitea
-                    pkg-config
-                    gcc
-                    mupdf
-                    gnumake
-                    ;
+              (callPackage ./packages/_emacs-reader.nix {
+                inherit (pkgs)
+                  fetchFromGitea
+                  pkg-config
+                  gcc
+                  mupdf
+                  gnumake
+                  ;
 
-                  inherit (epkgs) melpaBuild;
-                })
-              */
+                inherit (epkgs) melpaBuild;
+              })
 
               org-roam
               org-roam-ui
@@ -146,6 +148,7 @@
               which-key
               with-editor
               with-emacs
+              yasnippet
             ];
 
         };

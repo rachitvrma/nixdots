@@ -1,4 +1,4 @@
-{ inputs, self, ... }:
+{ inputs, ... }:
 {
   flake.homeModules.niri =
     {
@@ -16,15 +16,6 @@
         # Module, comment the these modules
         inputs.niri.homeModules.stylix
         inputs.niri.homeModules.niri
-
-        # Modules to use with niri
-        self.homeModules.avizo
-        self.homeModules.fuzzel
-        self.homeModules.swayidle
-        self.homeModules.swaylock
-        self.homeModules.waybar
-        self.homeModules.wbg
-        self.homeModules.wlsunset
       ];
 
       services.gnome-keyring = {
@@ -120,14 +111,18 @@
                 # sound = spawn "wpctl" "set-volume" "-l" "1" "@DEFAULT_AUDIO_SINK@";
                 playerctl = spawn "playerctl";
                 # brightness = spawn "brightnessctl" "-e4" "-n2" "set";
+                noctalia =
+                  cmd:
+                  [
+                    "noctalia-shell"
+                    "ipc"
+                    "call"
+                  ]
+                  ++ (pkgs.lib.splitString " " cmd);
               in
               {
                 "Mod+D" = {
-                  action = spawn [
-                    # "${pkgs.fuzzel}/bin/fuzzel"
-                    "fuzzel_supermenu.sh"
-                  ];
-                  hotkey-overlay.title = "Run an Application: vicinae";
+                  action.spawn = noctalia "launcher toggle";
                 };
 
                 "Mod+G" = {
@@ -221,38 +216,18 @@
 
                 XF86AudioRaiseVolume = {
                   # action = sound "5%+";
-                  action = spawn [
-                    "volumectl"
-                    "-u"
-                    "up"
-                  ];
+                  action.spawn = noctalia "volume increase";
 
                   allow-when-locked = true;
                 };
                 XF86AudioLowerVolume = {
                   # action = sound "5%-";
-                  action = spawn [
-                    "volumectl"
-                    "-u"
-                    "down"
-                  ];
+                  action.spawn = noctalia "volume decrease";
 
                   allow-when-locked = true;
                 };
                 XF86AudioMute = {
-                  /*
-                    action = spawn [
-                      "wpctl"
-                      "set-mute"
-                      "@DEFAULT_AUDIO_SINK@"
-                      "toggle"
-                    ];
-                  */
-
-                  action = spawn [
-                    "volumectl"
-                    "toggle-mute"
-                  ];
+                  action.spawn = noctalia "volume muteOutput";
 
                   allow-when-locked = true;
                 };

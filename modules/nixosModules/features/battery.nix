@@ -14,24 +14,29 @@
 
       thermald.enable = true;
 
-      auto-cpufreq = {
-        enable = true;
-        settings = {
-          battery = {
-            governor = "powersave";
-            turbo = "never";
-            energy_perf_bias = "balance_power";
-            enable_thresholds = true;
-            start_threshold = 20;
-            stop_threshold = 80;
-          };
-          charger = {
-            governor = "performance";
-            turbo = "always";
-            energy_perf_bias = "performance";
+      tuned.enable = true;
+
+      # Noctalia Shell does not support auto-cpufreq
+      /*
+        auto-cpufreq = {
+          enable = true;
+          settings = {
+            battery = {
+              governor = "powersave";
+              turbo = "never";
+              energy_perf_bias = "balance_power";
+              enable_thresholds = true;
+              start_threshold = 20;
+              stop_threshold = 80;
+            };
+            charger = {
+              governor = "performance";
+              turbo = "always";
+              energy_perf_bias = "performance";
+            };
           };
         };
-      };
+      */
     };
   };
 }

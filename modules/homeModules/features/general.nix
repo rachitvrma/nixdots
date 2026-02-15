@@ -64,6 +64,11 @@
         );
 
         base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-material-dark-hard.yaml";
+
+        override = {
+          base00 = "141617";
+        };
+
         polarity = "dark";
 
         fonts = {

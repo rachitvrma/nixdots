@@ -11,6 +11,7 @@
 
       imports = [
         self.homeModules.firefox
+        self.homeModules.noctalia
         self.homeModules.qutebrowser
         self.homeModules.tomat
         self.homeModules.zathura

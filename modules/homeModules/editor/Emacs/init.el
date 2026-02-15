@@ -1,16 +1,34 @@
+;; -*- lexical-binding: t; -*-
+
 (use-package dash
    :init
    (global-dash-fontify-mode))
 
-(setq inhibit-startup-message t)
+(let ((backup-dir (expand-file-name "backups/" user-emacs-directory))
+      (autosave-dir (expand-file-name "auto-saves/" user-emacs-directory)))
+
+  (make-directory backup-dir t)
+  (make-directory autosave-dir t)
+      
+;; Backups
+(setq backup-directory-alist
+      `(("." . ,backup-dir))
+      backup-by-copying t
+      delete-old-versions t
+      kept-new-versions 10
+      kept-old-versions 5
+      version-control t)
+
+;; Auto-saves
+(setq auto-save-file-name-transforms
+      `((".*" ,autosave-dir t))))
+
 (scroll-bar-mode -1)
-(tool-bar-mode -1)
-(tooltip-mode -1)
-(set-fringe-mode 10)
-(menu-bar-mode -1)
-
+(setq inhibit-startup-message t)
 (setq visible-bell t)
+(fringe-mode 0)
 
+;; Use Relative Line Numbers
 (column-number-mode)
 (setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode t)
@@ -27,8 +45,8 @@
 
 ;; Add frame borders and window dividers
 (modify-all-frames-parameters
- '((right-divider-width . 40)
-   (internal-border-width . 40)))
+ '((right-divider-width . 20)
+   (internal-border-width . 20)))
 (dolist (face '(window-divider
                 window-divider-first-pixel
                 window-divider-last-pixel))
@@ -42,26 +60,18 @@
 (defun my/variables-custom ()
   (setq line-spacing 0.2)) ;; Increase line-spacing a little
 
-(defun my/set-font-faces ()
-  (message "Set Font Faces!")
-  ;; Font size
-  (set-face-attribute 'default nil :font "Maple Mono NF" :height 120)
+(defun my/frame-face-setup (frame)
+  (with-selected-frame frame
+    (set-face-attribute 'fixed-pitch frame
+                        :family "Maple Mono NF"
+                        :height 1.0)
 
-  ;; Set the fixed pitch face
-  (set-face-attribute 'fixed-pitch nil :family "Maple Mono NF" :height 1.1)
+    (set-face-attribute 'variable-pitch frame
+                        :family "Cantarell"
+                        :height 1.14
+                        :weight 'regular)))
 
-  ;; Set the variable pitch face
-  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 1.14 :weight 'regular))
-
-;; When started in daemon mode, emacs doesn't load it properly. So there's this.
-(if (daemonp)
-    (add-hook 'after-make-frame-functions
-              (lambda (frame)
-		(setq doom-modeline-icon t)
-		(with-selected-frame frame
-                  (my/set-font-faces)
-		    (my/variables-custom))))
-  (my/set-font-faces))
+(add-hook 'after-make-frame-functions #'my/frame-face-setup)
 
 (use-package ligature
   :config
@@ -83,10 +93,7 @@
 ;; General usage
 (use-package nerd-icons)
 
-;; use with dired 
-(use-package nerd-icons-dired
-  :hook
-  (dired-mode . nerd-icons-dired-mode))
+
 
 ;; Use in ibuffer
 (use-package nerd-icons-ibuffer
@@ -99,11 +106,50 @@
   (nerd-icons-completion-mode)
   :hook (marginalia-mode nerd-icons-completion-marginalia-setup))
 
+;; use nerd fonts with dired 
+(use-package nerd-icons-dired
+  :hook
+  (dired-mode . nerd-icons-dired-mode))
+
+(use-package dired
+  :ensure nil
+  :config
+  ;; Let dired guess copy/move destinations
+  (setq dired-dwim-target t)
+  
+  ;; 1. better listing format
+  (setq dired-listing-switches "-alh --group-directories-first")
+
+  ;; 2. Auto revert when files change
+  (setq global-auto-revert-non-file-buffers t)
+  (setq auto-revert-verbose nil)
+  (add-hook 'dired-mode-hook #'auto-revert-mode)
+
+  ;; 3. Reuse same buffer instead of creating new ones
+  (put 'dired-find-alternate-file 'disabled nil)
+  (define-key dired-mode-map (kbd "RET") #'dired-find-alternate-file)
+  (define-key dired-mode-map (kbd "^")
+	      (lambda ()
+		(interactive)
+		(find-alternate-file "..")))
+
+  ;; 4. Hide details by default
+  (add-hook 'dired-mode-hook #'dired-hide-details-mode)
+
+  ;; 5. Recursive operations without confirmation spam
+  (setq dired-recursive-copies 'always)
+  (setq dired-recursive-deletes 'top))
+
+(use-package dired-subtree
+  :after dired
+  :bind (:map dired-mode-map
+              ("TAB" . dired-subtree-toggle)))
+
 (use-package doom-modeline
   :custom
   (doom-modeline-hud t)
-  (doom-modeline-minor-modes t)
-  (doom-modeline-enable-word-count t)
+  (doom-modeline-major-mode-color-icon t)
+  
   :init
   (doom-modeline-mode 1))
 
@@ -202,6 +248,9 @@
   (next-error . #'pulsar-pulse-line)
 (minibuffer-setup-hook . #'pulsar-pulse-line))
 
+(use-package info-colors
+  :hook (Info-selection . info-colors-fontify-node))
+
 (use-package no-littering)
 
 (defun my/org-mode-setup ()
@@ -223,16 +272,16 @@
 
   ;; Make the document title a bit bigger
   (set-face-attribute 'org-document-title nil :font "Cantarell" :weight
-		      'bold :height 1.8)
+    		      'bold :height 1.8)
   (require 'org-indent)
   (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
   (set-face-attribute 'org-block nil            :foreground 'unspecified :inherit
-		      'fixed-pitch :height 0.85)
+    		      'fixed-pitch :height 0.85)
   (set-face-attribute 'org-code nil             :inherit '(shadow fixed-pitch) :height 0.85)
   (set-face-attribute 'org-indent nil           :inherit '(org-hide fixed-pitch) :height 0.85)
   (set-face-attribute 'org-verbatim nil         :inherit '(shadow fixed-pitch) :height 0.85)
   (set-face-attribute 'org-special-keyword nil  :inherit '(font-lock-comment-face
-							   fixed-pitch))
+    							   fixed-pitch))
   (set-face-attribute 'org-meta-line nil        :inherit '(font-lock-comment-face fixed-pitch))
   (set-face-attribute 'org-checkbox nil         :inherit 'fixed-pitch))
 
@@ -255,7 +304,49 @@
   ;; Enable org templates
   (require 'org-tempo)
   (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
-  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp")))
+  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+  
+
+  ;; Configuring org-capture
+
+  ;; First set the default org notes directory
+  (setq org-directory "~/org"
+    	org-default-notes-file (expand-file-name "tasks.org" org-directory))
+  (setq org-log-done 'time)
+  (setq org-log-into-drawer t)
+
+  (setq org-refile-targets
+	'(("archive.org" :maxlevel . 1)
+	  ("tasks.org" :maxlevel . 1)))
+
+  ;; Save org buffers after refiling
+  (advice-add 'org-refile
+	      :after 'org-save-all-org-buffers)
+  
+  (setq org-capture-templates
+	'(("t" "Tasks / Projects")
+	  ("tt" "Task" entry
+           (file+headline "tasks.org" "Inbox")
+           "* TODO %?\n  %U\n %a\n %i" :empty-lines 1)
+
+	  ("j" "Journal Entries")
+          ("jj" "Journal" entry
+           (file+olp+datetree "~/org/journal.org")
+           "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
+           ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
+           :clock-in :clock-resume
+           :empty-lines 1)))
+
+  (defun my/org-capture-task ()
+    (interactive)
+    (org-capture nil "tt"))
+
+  (defun my/org-capture-journal ()
+    (interactive)
+    (org-capture nil "jj"))
+
+  (keymap-global-set "C-c t" #'my/org-capture-task)
+  (keymap-global-set "C-c j" #'my/org-capture-journal))
 
 (use-package org-modern
   :custom
@@ -295,20 +386,15 @@
 (with-eval-after-load 'org
   (org-babel-do-load-languages
    'org-babel-load-languages
-   '((emacs-lisp . t))))
+   '((emacs-lisp . t)
+     (C . t))))
 
-(use-package org-journal
-  :defer t
-  :init
-  (setq org-journal-prefix-key "C-c j")
-  
+(use-package org-roam
+  :custom
+  (org-roam-directory (file-truename "~/org"))
+  (org-roam-completion-everywhere t)
   :config
-  (setq org-journal-dir "~/Documents/Journals/"
-	org-journal-date-format "%A, %d %B %Y"
-	org-journal-file-type 'yearly)
-  
-  ;; Add org-journal-dir to org-agenda-files
-  (add-to-list 'org-agenda-files org-journal-dir))
+  (org-roam-db-autosync-mode))
 
 (use-package ace-window
   :bind ("M-o" . ace-window))
@@ -351,7 +437,7 @@
 
 (use-package projectile
   :init
-  (projectile-mode +1)
+  (projectile-mode 1)
   
   :custom
   (projectile-project-search-path '("~/Development/" "~/nixdots/"))
@@ -396,7 +482,7 @@
 
 (use-package cape
   ;; Bind prefix keymap providing all Cape commands under a menmonic key.
-  :bind ("C-c c" . cape-prefix-map)
+  :bind ("C-x c" . cape-prefix-map)
   :init
   ;; Add to the global default value of `completion-at-point-functions' which is
   ;; used by `completion-at-point'.  The order of the functions matters, the
@@ -620,6 +706,25 @@ targets."
 (setopt select-enable-primary nil)
 (setopt interprogram-cut-function #'gui-select-text)
 
+(use-package reader
+  :commands
+  (reader-mode)
+  :hook
+  (reader-mode . (lambda () (display-line-numbers-mode -1))))
+
+
+;; The new version is still expecting a function that it does not provide.
+(with-eval-after-load 'reader
+ (unless (fboundp 'reader-current-doc-pagenumber)
+    (defalias 'reader-current-doc-pagenumber
+      #'reader-dyn--current-doc-pagenumber)))
+
 (use-package aria2
   :custom
   (aria2-download-directory (expand-file-name "~/Downloads/")))
+
+(use-package emms
+  :init (emms-all)
+  :config
+  (setq emms-player-list '(emms-player-mpv)
+	emms-info-functions '(emms-info-native)))
