@@ -10,25 +10,34 @@
     in
     {
       imports = [ inputs.noctalia.homeModules.default ];
-      home.file.".face".source = image;
-      home.packages = [
-        # Use it to just see the diff and move the differences here.
-        (pkgs.writeShellScriptBin "noctalia-diff" ''
-          nix shell nixpkgs#jq nixpkgs#colordiff \
-          -c bash -c "colordiff -u --nobanner \
-          <(jq -S . ~/.config/noctalia/settings.json) \
-          <(noctalia-shell ipc call state all | jq -S .settings)"
-        '')
-      ];
+
+      home = {
+        file.".face".source = image;
+        packages = [
+          # Use it to just see the diff and move the differences here.
+          (pkgs.writeShellScriptBin "noctalia-diff" ''
+            nix shell nixpkgs#jq nixpkgs#colordiff \
+            -c bash -c "colordiff -u --nobanner \
+            <(jq -S . ~/.config/noctalia/settings.json) \
+            <(noctalia-shell ipc call state all | jq -S .settings)"
+          '')
+        ];
+      };
 
       programs.noctalia-shell = {
         enable = true;
         systemd.enable = true;
         settings = {
+          # app launcher setting
+          appLauncher = {
+            enableClipboardHistory = true;
+            viewMode = "grid";
+            terminalCommand = "kitty -e";
+          };
           # configure noctalia here
           bar = {
             density = "compact";
-            position = "right";
+            position = "left";
             showCapsule = false;
             widgets = {
               left = [
@@ -48,7 +57,7 @@
 
               center = [
                 {
-                  hideUnoccupied = false;
+                  hideUnoccupied = true;
                   id = "Workspace";
                   labelMode = "none";
                 }
@@ -56,9 +65,10 @@
 
               right = [
                 {
-                  alwaysShowPercentage = true;
+                  alwaysShowPercentage = false;
                   id = "Battery";
                   warningThreshold = 40;
+                  showNoctaliaPerformance = true;
                 }
 
                 {

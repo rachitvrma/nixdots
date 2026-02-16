@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, self, ... }:
 {
   flake.homeModules.niri =
     {
@@ -16,6 +16,8 @@
         # Module, comment the these modules
         inputs.niri.homeModules.stylix
         inputs.niri.homeModules.niri
+
+        self.homeModules.swayidle
       ];
 
       services.gnome-keyring = {
@@ -234,20 +236,14 @@
                 XF86MonBrightnessUp = {
                   # action = brightness "5%+";
 
-                  action = spawn [
-                    "lightctl"
-                    "up"
-                  ];
+                  action.spawn = noctalia "brightness increase";
 
                   allow-when-locked = true;
                 };
                 XF86MonBrightnessDown = {
                   # action = brightness "5%-";
 
-                  action = spawn [
-                    "lightctl"
-                    "down"
-                  ];
+                  action.spawn = noctalia "brightness decrease";
 
                   allow-when-locked = true;
                 };
@@ -338,9 +334,18 @@
             layer-rules = [
               {
                 matches = [
+                  # When using a normal Wallpaper tool
+                  /*
+                    {
+                      namespace = "^wallpaper$";
+                    }
+                  */
+
+                  # Using the noctalia wallpaper setting.
                   {
-                    namespace = "^wallpaper$";
+                    namespace = "^noctalia-wallpaper*";
                   }
+
                   {
                     namespace = "kitty-panel";
                   }
@@ -356,16 +361,16 @@
               {
                 draw-border-with-background = false;
                 # Enable rounded borders
-                # geometry-corner-radius =
-                #   let
-                #     r = 15.0;
-                #   in
-                #   {
-                #     top-left = r;
-                #     top-right = r;
-                #     bottom-right = r;
-                #     bottom-left = r;
-                #   };
+                geometry-corner-radius =
+                  let
+                    r = 20.0;
+                  in
+                  {
+                    top-left = r;
+                    top-right = r;
+                    bottom-right = r;
+                    bottom-left = r;
+                  };
 
                 clip-to-geometry = true;
               }
@@ -430,7 +435,7 @@
 
             clipboard.disable-primary = true;
             overview = {
-              zoom = 0.5;
+              # zoom = 0.5;
               workspace-shadow = {
                 enable = false;
               };
@@ -516,6 +521,7 @@
 
             debug = {
               # Activate focus on the window that opens from vicinae
+              # Also allows notification actions and window activation from Noctali
               honor-xdg-activation-with-invalid-serial = [ ];
             };
           };

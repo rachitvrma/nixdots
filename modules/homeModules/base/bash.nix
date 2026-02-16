@@ -23,6 +23,11 @@
         info.enable = true;
         pandoc.enable = true;
 
+        # TODO: Configure settings module.
+        # Jq for json query
+        jq.enable = true;
+        jqp.enable = true; # TuI for jq
+
         fzf = {
           enable = true;
 
@@ -135,6 +140,8 @@
           ".." = "cd ..";
           kava = "kitten panel --edge=background --override background_opacity=0.0 cava";
           tp = "${pkgs.trashy}/bin/trash put";
+
+          jctl = "journalctl --user -xeu";
         };
         sessionVariables = userVars;
 
