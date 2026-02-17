@@ -113,6 +113,8 @@
 
 (use-package dired
   :ensure nil
+  :hook
+  (dired-mode . dired-omit-mode)
   :config
   ;; Let dired guess copy/move destinations
   (setq dired-dwim-target t)

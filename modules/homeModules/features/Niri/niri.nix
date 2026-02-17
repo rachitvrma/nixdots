@@ -134,14 +134,14 @@
                   hotkey-overlay.title = "Open clipboard";
                 };
 
-                "Mod+Return" = {
+                "Mod+Shift+Return" = {
                   action = spawn [
                     "kitty"
                   ];
                   hotkey-overlay.title = "Spawn Kitty Terminal";
                 };
 
-                "Mod+Shift+Return" = {
+                "Mod+Return" = {
                   action = spawn [
                     "${config.programs.emacs.package}/bin/emacsclient"
                     "-a"
