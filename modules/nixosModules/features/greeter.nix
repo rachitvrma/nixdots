@@ -32,10 +32,10 @@
         };
       };
 
+      # Put "hyprland" here when using Hyprland
       environment.etc."greetd/environments".text = ''
-	niri
-        bash
-        hyprland
+        	niri
+          bash
       '';
     };
 }

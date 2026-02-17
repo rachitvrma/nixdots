@@ -117,6 +117,10 @@
               radiusRatio = 0.2;
             };
 
+            dock = {
+              colorizeIcons = true;
+            };
+
             widgets = {
               center = [
                 {
@@ -289,6 +293,10 @@
             normalUrgencyDuration = 8;
             overlayLayer = true;
             respectExpireTimeout = false;
+          };
+
+          nightLight = {
+            enabled = true;
           };
 
           osd = {

@@ -185,6 +185,9 @@
                 # "Mod+R".action = set-preset-column-width;
                 "Mod+Shift+R".action = switch-preset-window-height;
                 "Mod+Ctrl+R".action = reset-window-height;
+
+                # TODO: set to maximize-window-to-edges.
+                # It's still not implemented in sodiboo/niri-flake.
                 "Mod+M".action = maximize-column;
                 "Mod+Shift+M".action = fullscreen-window;
                 "Mod+Ctrl+M".action = expand-column-to-available-width;
@@ -303,13 +306,13 @@
               };
 
               border = {
-                width = 2;
+                width = 3;
 
                 active.gradient = {
                   from = colors.base0E;
                   to = colors.base0D;
                   angle = 45;
-                  in' = "oklab";
+                  in' = "oklch shorter hue";
                   relative-to = "workspace-view";
                 };
                 inactive.color = colors.base02;
@@ -340,17 +343,15 @@
                       namespace = "^wallpaper$";
                     }
                   */
-
                   # Using the noctalia wallpaper setting.
                   {
                     namespace = "^noctalia-wallpaper*";
                   }
-
                   {
-                    namespace = "kitty-panel";
+                    namespace = "^noctalia-desktop-widgets*";
                   }
                   {
-                    namespace = "ashell-main-layer";
+                    namespace = "kitty-panel";
                   }
                 ];
                 place-within-backdrop = true;
@@ -430,6 +431,16 @@
                 default-window-height = {
                   fixed = 683;
                 };
+              }
+
+              # Open Emacs with maximization to edges
+              {
+                matches = [
+                  { app-id = "emacs$"; }
+                ];
+                # TODO: Set open-maximized to open-maximized-to-edges
+                # See https://github.com/niri-wm/niri/wiki/Fullscreen-and-Maximize
+                open-maximized = true;
               }
             ];
 

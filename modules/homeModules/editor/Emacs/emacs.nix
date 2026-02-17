@@ -140,6 +140,7 @@
               ripgrep
               saveplace-pdf-view # To save the last visited information in pdf-mode
               shfmt
+              smartparens # For auto-parenthesis
               tab-line-nerd-icons
               use-package
               vertico

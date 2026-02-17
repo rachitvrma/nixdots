@@ -112,7 +112,6 @@
   (dired-mode . nerd-icons-dired-mode))
 
 (use-package dired
-  :ensure nil
   :hook
   (dired-mode . dired-omit-mode)
   :config
@@ -126,14 +125,6 @@
   (setq global-auto-revert-non-file-buffers t)
   (setq auto-revert-verbose nil)
   (add-hook 'dired-mode-hook #'auto-revert-mode)
-
-  ;; 3. Reuse same buffer instead of creating new ones
-  (put 'dired-find-alternate-file 'disabled nil)
-  (define-key dired-mode-map (kbd "RET") #'dired-find-alternate-file)
-  (define-key dired-mode-map (kbd "^")
-	      (lambda ()
-		(interactive)
-		(find-alternate-file "..")))
 
   ;; 4. Hide details by default
   (add-hook 'dired-mode-hook #'dired-hide-details-mode)
@@ -446,6 +437,12 @@
   
   :bind (:map projectile-mode-map
 	      ("C-c p" . projectile-command-map)))
+
+(use-package smartparens
+  :hook (prog-mode text-mode markdown-mode) ;; add `smartparens-mode` to these hooks
+  :config
+  ;; load default config
+  (require 'smartparens-config))
 
 (use-package lsp-mode
   :custom
