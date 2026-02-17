@@ -1,0 +1,13 @@
+#+title: Notes About NixOS and stuff
+
+* Convert JSON files to Nix files
+
+We can [[https://github.com/theobori/nix-converter][nix-converter]], but recently it's been writing double quotes around nix keys. So we can use native nix tooling as well.
+
+#+begin_src shell
+    
+  $nix-instantiate --eval --expr "builtins.fromJSON (builtins.readFile ./file.json)"
+  
+#+end_src
+
+Just place the name of the json file in place of =file.json=.

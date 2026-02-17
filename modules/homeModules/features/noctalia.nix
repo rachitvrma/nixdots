@@ -28,66 +28,285 @@
         enable = true;
         systemd.enable = true;
         settings = {
-          # app launcher setting
           appLauncher = {
+            autoPasteClipboard = false;
+            clipboardWatchImageCommand = "wl-paste --type image --watch cliphist store";
+            clipboardWatchTextCommand = "wl-paste --type text --watch cliphist store";
+            clipboardWrapText = true;
+            customLaunchPrefix = "";
+            customLaunchPrefixEnabled = false;
+            density = "default";
+            enableClipPreview = true;
             enableClipboardHistory = true;
-            viewMode = "grid";
+            enableSessionSearch = true;
+            enableSettingsSearch = true;
+            enableWindowsSearch = true;
+            iconMode = "tabler";
+            ignoreMouseInput = false;
+            overviewLayer = false;
+            pinnedApps = [ ];
+            position = "center";
+            screenshotAnnotationTool = "";
+            showCategories = true;
+            showIconBackground = false;
+            sortByMostUsed = true;
             terminalCommand = "kitty -e";
+            useApp2Unit = false;
+            viewMode = "grid";
           };
-          # configure noctalia here
+
+          desktopWidgets = {
+            enabled = true;
+            gridSnap = false;
+            monitorWidgets = [
+              {
+                name = "eDP-1";
+                widgets = [
+                  {
+                    clockColor = "none";
+                    clockStyle = "minimal";
+                    customFont = "";
+                    format = "hh:mm A\\nd MMMM yyyy";
+                    id = "Clock";
+                    roundedCorners = true;
+                    showBackground = true;
+                    useCustomFont = false;
+                    x = 1742;
+                    y = 996;
+                  }
+                ];
+              }
+            ];
+          };
+
+          audio = {
+            cavaFrameRate = 30;
+            mprisBlacklist = [ ];
+            preferredPlayer = "";
+            visualizerType = "linear";
+            volumeFeedback = false;
+            volumeOverdrive = false;
+            volumeStep = 5;
+          };
+
           bar = {
+            autoHideDelay = 500;
+            autoShowDelay = 150;
+            # backgroundOpacity = 1;   # Stylix Manages it
+            barType = "simple";
+            capsuleColorKey = "none";
+            # capsuleOpacity = 1;
             density = "compact";
+            displayMode = "always_visible";
+            floating = false;
+            frameRadius = 12;
+            frameThickness = 8;
+            hideOnOverview = false;
+            marginHorizontal = 4;
+            marginVertical = 4;
+            monitors = [ ];
+            outerCorners = true;
             position = "left";
+            screenOverrides = [ ];
             showCapsule = false;
+            showOutline = false;
+            useSeparateOpacity = false;
+
+            general = {
+              avatarImage = "/home/krish/.face";
+              radiusRatio = 0.2;
+            };
+
             widgets = {
-              left = [
+              center = [
                 {
-                  id = "ControlCenter";
-                  useDistroLogo = true;
-                }
-
-                {
-                  id = "Network";
-                }
-
-                {
-                  id = "Bluetooth";
+                  characterCount = 2;
+                  colorizeIcons = true;
+                  emptyColor = "secondary";
+                  enableScrollWheel = true;
+                  focusedColor = "primary";
+                  followFocusedScreen = false;
+                  groupedBorderOpacity = 1;
+                  hideUnoccupied = true;
+                  iconScale = 0.8;
+                  id = "Workspace";
+                  labelMode = "none";
+                  occupiedColor = "secondary";
+                  pillSize = 0.6;
+                  showApplications = false;
+                  showBadge = true;
+                  showLabelsOnlyWhenOccupied = true;
+                  unfocusedIconsOpacity = 1;
                 }
               ];
 
-              center = [
+              left = [
                 {
-                  hideUnoccupied = true;
-                  id = "Workspace";
-                  labelMode = "none";
+                  colorizeDistroLogo = false;
+                  colorizeSystemIcon = "none";
+                  customIconPath = "";
+                  enableColorization = false;
+                  icon = "noctalia";
+                  id = "ControlCenter";
+                  useDistroLogo = true;
+                }
+                {
+                  id = "Network";
+                  displayMode = "onhover";
+                  iconColor = "none";
+                  textColor = "none";
+                }
+                {
+                  id = "Bluetooth";
+                  displayMode = "onhover";
+                  iconColor = "none";
+                  textColor = "none";
                 }
               ];
 
               right = [
                 {
                   alwaysShowPercentage = false;
+                  deviceNativePath = "__default__";
+                  displayMode = "graphic-clean";
+                  hideIfIdle = false;
+                  hideIfNotDetected = true;
                   id = "Battery";
-                  warningThreshold = 40;
                   showNoctaliaPerformance = true;
+                  warningThreshold = 40;
+                  showPowerProfiles = false;
                 }
-
                 {
-                  formatHorizontal = "HH:mm";
-                  formatVertical = "HH mm";
+                  clockColor = "none";
+                  customFont = "";
+                  formatHorizontal = "hh:mm A";
+                  formatVertical = "hh mm A";
                   id = "Clock";
                   useMonospacedFont = true;
                   usePrimaryColor = true;
+                  tooltipFormat = "hh:mm A ddd, MMM dd";
+                  useCustomFont = false;
                 }
               ];
             };
-
-            general = {
-              avatarImage = "/home/krish/.face";
-              radiusRatio = 0.2;
-            };
           };
+
+          brightness = {
+            brightnessStep = 5;
+            enableDdcSupport = false;
+            enforceMinimum = true;
+          };
+
+          location = {
+            analogClockInCalendar = true;
+            name = "Kolkata";
+            showWeekNumberInCalendar = true;
+          };
+
+          calendar = {
+            cards = [
+              {
+                enabled = true;
+                id = "calendar-header-card";
+              }
+              {
+                enabled = true;
+                id = "calendar-month-card";
+              }
+              {
+                enabled = true;
+                id = "weather-card";
+              }
+            ];
+          };
+
+          colorSchemes = {
+            darkMode = true;
+            generationMethod = "tonal-spot";
+            manualSunrise = "06:30";
+            manualSunset = "18:30";
+            monitorForColors = "";
+            predefinedScheme = "Noctalia (default)";
+            schedulingMode = "off";
+            useWallpaperColors = false;
+          };
+
+          dock = {
+            animationSpeed = 1;
+            # backgroundOpacity = 1;   # Stylix Manages it
+            colorizeIcons = false;
+            deadOpacity = 0.6;
+            displayMode = "auto_hide";
+            enabled = true;
+            floatingRatio = 1;
+            inactiveIndicators = false;
+            monitors = [ ];
+            onlySameOutput = true;
+            pinnedApps = [ ];
+            pinnedStatic = false;
+            position = "bottom";
+            size = 1;
+          };
+
+          ui = {
+            bluetoothDetailsViewMode = "grid";
+            bluetoothHideUnnamedDevices = false;
+            boxBorderEnabled = false;
+            fontDefaultScale = 1;
+            fontFixedScale = 1;
+            networkPanelView = "wifi";
+            panelsAttachedToBar = true;
+            settingsPanelMode = "attached";
+            tooltipsEnabled = true;
+            wifiDetailsViewMode = "grid";
+          };
+
+          notifications = {
+            saveToHistory = {
+              critical = true;
+              low = true;
+              normal = true;
+            };
+            sounds = {
+              criticalSoundFile = "";
+              enabled = false;
+              excludedApps = "discord,firefox,chrome,chromium,edge";
+              lowSoundFile = "";
+              normalSoundFile = "";
+              separateSounds = false;
+              volume = 0.5;
+            };
+            # backgroundOpacity = 0.9; # Stylix Manages it
+            criticalUrgencyDuration = 15;
+            density = "default";
+            enableBatteryToast = true;
+            enableKeyboardLayoutToast = true;
+            enableMediaToast = false;
+            enabled = true;
+            location = "top_right";
+            lowUrgencyDuration = 3;
+            monitors = [ ];
+            normalUrgencyDuration = 8;
+            overlayLayer = true;
+            respectExpireTimeout = false;
+          };
+
+          osd = {
+            autoHideMs = 2000;
+            # backgroundOpacity = 0.9; # stylix value
+            enabled = true;
+            enabledTypes = [
+              0
+              1
+              2
+            ];
+            location = "top_right";
+            monitors = [ ];
+            overlayLayer = true;
+          };
+
+          settingsVersion = 53;
         };
       };
-
     };
 }
