@@ -30,9 +30,6 @@
 > [!NOTE]
 > I have taken a heavy inspiration from [vimjoyer's nixconf repo](https://github.com/vimjoyer/nixconf). However, I have not put to use the wrapper's configuration. I am still using home-manager, because it solves a lot of problems that would rather need to be solved manually when using wrappers.
 
-> [!NOTE]
-> I have moved to [Helix](https://helix-editor.com) as my main editor. It's got a smaller codebase than Neovim and written in rust. It offers a lot of functionalities of Neovim. I might return to Neovim once the built-in package manager in [12.0+ version of Neovim](https://github.com/neovim/neovim/milestone/43) is integrated in Gerg-L's mnw.
-
 # 📔 Instructions for installation
 
 I am presuming that a bootable USB is already prepared. Boot into the computer.
