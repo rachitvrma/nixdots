@@ -27,6 +27,29 @@
       programs.noctalia-shell = {
         enable = true;
         systemd.enable = true;
+
+        # Plugins
+        plugins = {
+          sources = [
+            {
+              enabled = true;
+              name = "Official Noctalia Plugins";
+              url = "https://github.com/noctalia-dev/noctalia-plugins";
+            }
+          ];
+          states = {
+            niri-overview-launcher = {
+              enabled = true;
+              sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
+            };
+            pomodoro = {
+              enabled = true;
+              sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
+            };
+          };
+        };
+
+        # Settings
         settings = {
           appLauncher = {
             autoPasteClipboard = false;
