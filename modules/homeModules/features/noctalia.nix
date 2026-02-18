@@ -49,6 +49,19 @@
           };
         };
 
+        pluginSettings = {
+          pomodoro = {
+            autoStartBreaks = true;
+            autoStartWork = true;
+            compactMode = true;
+            longBreakDuration = 15;
+            playSound = true;
+            sessionsBeforeLongBreak = 4;
+            shortBreakDuration = 5;
+            workDuration = 25;
+          };
+        };
+
         # Settings
         settings = {
           appLauncher = {
@@ -213,6 +226,10 @@
                   usePrimaryColor = true;
                   tooltipFormat = "hh:mm A ddd, MMM dd";
                   useCustomFont = false;
+                }
+
+                {
+                  id = "plugin:pomodoro";
                 }
               ];
             };

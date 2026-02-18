@@ -7,6 +7,7 @@
         self.nixosModules.battery
         self.nixosModules.clamav
         self.nixosModules.console
+        self.nixosModules.discord
         # self.nixosModules.greeter
         self.nixosModules.kdeconnect
         self.nixosModules.keymap
