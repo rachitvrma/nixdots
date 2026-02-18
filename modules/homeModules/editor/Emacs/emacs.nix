@@ -6,9 +6,9 @@
         targets.emacs = {
           enable = true;
 
-          opacity.override = {
-            applications = 0.89;
-            desktop = 0.89;
+          opacity.override = rec {
+            applications = 0.9;
+            desktop = applications;
           };
 
           fonts.override = {
@@ -19,8 +19,10 @@
 
       home.packages = with pkgs; [
         bash-language-server # bash-language server
-        ffmpegthumbnailer # For org-beautify links
+        ffmpegthumbnailer # For ready-player
+        ffmpeg-full # For ready-player
         imagemagick # For rendering images inside org
+        mpg123 # For music decoding in ready player
         nixd # nix server
         nixfmt # for formatting nix
 
@@ -79,7 +81,6 @@
               embark
               embark-consult
               embark-org-roam
-              emms
               eshell-git-prompt
               eshell-vterm
               exec-path-from-shell
@@ -137,6 +138,7 @@
               projectile-ripgrep
               pulsar
               rainbow-delimiters
+              ready-player # Music player for Emacs
               ripgrep
               saveplace-pdf-view # To save the last visited information in pdf-mode
               shfmt

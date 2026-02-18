@@ -40,7 +40,8 @@
   		treemacs-mode-hook
   		eshell-mode-hook
   		vterm-mode-hook
-  		pdf-mode-hook))
+  		pdf-mode-hook
+		ready-player-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 ;; Add frame borders and window dividers
@@ -722,8 +723,18 @@ targets."
   :custom
   (aria2-download-directory (expand-file-name "~/Downloads/")))
 
-(use-package emms
-  :init (emms-all)
+(use-package ready-player
+  :hook
+  (ready-player-major-mode . (lambda () (setq display-line-numbers-mode -1)))
+  :custom
+  ;; Know my music collection before hand.
+  (ready-player-my-media-collection-location "/home/krish/Music")
+
+  ;; Disable default bindings which is C-c m, occupied my manual-entry command
+  (ready-player-set-global-bindings nil)
+
+  ;; Cache metadata for faster startups
+  (ready-player-cache-metadata t)
+  (ready-player-cache-thumbnails t)
   :config
-  (setq emms-player-list '(emms-player-mpv)
-	emms-info-functions '(emms-info-native)))
+  (ready-player-mode +1))

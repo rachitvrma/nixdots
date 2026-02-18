@@ -56,10 +56,21 @@
         */
 
         # This is for gruvbox
+        /*
+          image = (
+            pkgs.fetchurl {
+              url = "https://gruvbox-wallpapers.pages.dev/wallpapers/mix/Powerline.png";
+              hash = "sha256-pXlwsQrcfIXFMoLBAvViaStQY/BozRuLHLgxoAbu0SI=";
+            }
+          );
+        */
+
+        # A great CAT themed wallpaper
         image = (
           pkgs.fetchurl {
-            url = "https://gruvbox-wallpapers.pages.dev/wallpapers/mix/Powerline.png";
-            hash = "sha256-pXlwsQrcfIXFMoLBAvViaStQY/BozRuLHLgxoAbu0SI=";
+            url = "https://raw.githubusercontent.com/rachitvrma/Wallpapers/main/cats-sunrise-anime.jpg";
+
+            hash = "sha256-7rH93pv3CEVg0pzDqsXwzcUcYoWw6U27wc2b7mEundc=";
           }
         );
 

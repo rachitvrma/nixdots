@@ -1,8 +1,8 @@
 <h1 align="center">
 <div align="center">
 <img src="./.github/images/nixos.svg" width="100px" />
-<a href="https://helix-editor.com/">
-<img src="./.github/images/helix.svg" width="60px" />
+<a href="https://www.gnu.org/software/emacs/">
+<img src="./.github/images/emacs.svg" width="100px" />
 </a>
 </div>
 <br>
@@ -10,9 +10,8 @@
 <div align="center">
 <p></p>
 <div align="center">
-<a href="https://helix-editor.com/">
-<!-- <img src="https://img.shields.io/badge/org_mode-9.7-blue.svg?style=for-the-badge&labelColor=1e1e2e&logo=org&logoColor=a6e3a1&color=1e1e2e"> -->
-<img src="https://img.shields.io/badge/helix-rust%20editor?style=for-the-badge&logo=helix&logoColor=white&labelColor=1e1e2e&color=1e1e2e">
+<a href="https://orgmode.org/">
+<img src="https://img.shields.io/badge/org_mode-9.7-blue.svg?style=for-the-badge&labelColor=1e1e2e&logo=org&logoColor=a6e3a1&color=1e1e2e">
 </a>
 <a href="https://nixos.org">
 <img src="https://img.shields.io/badge/NixOS-unstable-blue.svg?style=for-the-badge&labelColor=1e1e2e&logo=NixOS&logoColor=89b4fa&color=1e1e2e">

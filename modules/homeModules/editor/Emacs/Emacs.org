@@ -91,7 +91,8 @@ This goes to [[file:early-init.el][early-init.el]] file.
     		treemacs-mode-hook
     		eshell-mode-hook
     		vterm-mode-hook
-    		pdf-mode-hook))
+    		pdf-mode-hook
+  		ready-player-mode-hook))
     (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 #+end_src
@@ -1126,13 +1127,35 @@ Elfeed is a rss reader for emacs.
 
 *  Music Listening
 [[https://github.com/emacsmirror/emms][Emms]] (Emacs Multi-Media System) is a system to listen to music.
-#+begin_src emacs-lisp :
+#+begin_src emacs-lisp :tangle no
 
   (use-package emms
     :init (emms-all)
     :config
     (setq emms-player-list '(emms-player-mpv)
   	emms-info-functions '(emms-info-native)))
+
+#+end_src
+
+There's another one more presentable: [[https://github.com/xenodium/ready-player][ready-player]].
+
+#+begin_src emacs-lisp
+
+  (use-package ready-player
+    :hook
+    (ready-player-major-mode . (lambda () (setq display-line-numbers-mode -1)))
+    :custom
+    ;; Know my music collection before hand.
+    (ready-player-my-media-collection-location "/home/krish/Music")
+
+    ;; Disable default bindings which is C-c m, occupied my manual-entry command
+    (ready-player-set-global-bindings nil)
+
+    ;; Cache metadata for faster startups
+    (ready-player-cache-metadata t)
+    (ready-player-cache-thumbnails t)
+    :config
+    (ready-player-mode +1))
 
 #+end_src
 
