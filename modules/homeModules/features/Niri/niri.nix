@@ -44,6 +44,7 @@
           package = pkgs.niri;
           settings = {
             prefer-no-csd = true;
+            hotkey-overlay.skip-at-startup = true;
 
             # Available for next version.
             xwayland-satellite = {
