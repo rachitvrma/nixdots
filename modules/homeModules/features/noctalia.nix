@@ -125,6 +125,20 @@
             volumeStep = 5;
           };
 
+          controlCenter = {
+            shortcuts = {
+              right = [
+                { id = "Notifications"; }
+                { id = "NightLight"; }
+              ];
+
+              left = [
+                { id = "WallpaperSelector"; }
+                { id = "NoctaliaPerformance"; }
+              ];
+            };
+          };
+
           bar = {
             autoHideDelay = 500;
             autoShowDelay = 150;
@@ -132,7 +146,7 @@
             barType = "simple";
             capsuleColorKey = "none";
             # capsuleOpacity = 1;
-            density = "compact";
+            density = "mini";
             displayMode = "always_visible";
             floating = false;
             frameRadius = 12;
@@ -177,6 +191,10 @@
                   showBadge = true;
                   showLabelsOnlyWhenOccupied = true;
                   unfocusedIconsOpacity = 1;
+                }
+
+                {
+                  id = "KeepAwake";
                 }
               ];
 

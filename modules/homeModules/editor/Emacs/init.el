@@ -107,37 +107,83 @@
   (nerd-icons-completion-mode)
   :hook (marginalia-mode nerd-icons-completion-marginalia-setup))
 
-;; use nerd fonts with dired 
-(use-package nerd-icons-dired
-  :hook
-  (dired-mode . nerd-icons-dired-mode))
-
 (use-package dired
-  :hook
-  (dired-mode . dired-omit-mode)
   :config
-  ;; Let dired guess copy/move destinations
-  (setq dired-dwim-target t)
+  (setq dired-listing-switches
+        "-l --almost-all --human-readable --group-directories-first --no-group")
+  ;; this command is useful when you want to close the window of `dirvish-side'
+  ;; automatically when opening a file
+  (put 'dired-find-alternate-file 'disabled nil))
+
+(use-package dirvish
+  :ensure t
+  :init
+  (dirvish-override-dired-mode)
+  :custom
+  (dirvish-quick-access-entries ; It's a custom option, `setq' won't work
+   '(("h" "~/"                          "Home")
+     ("d" "~/Downloads/"                "Downloads")
+     ("m" "/mnt/"                       "Drives")
+     ("s" "/ssh:my-remote-server")      "SSH server"
+     ("e" "/sudo:root@localhost:/etc")  "Modify program settings"
+     ("t" "~/.local/share/Trash/files/" "TrashCan")))
+
+  :config
+  ;; (dirvish-peek-mode)             ; Preview files in minibuffer
+  ;; (dirvish-side-follow-mode)      ; similar to `treemacs-follow-mode'
+
+  (setq delete-by-moving-to-trash t) ;; does what it says
+  (setq dirvish-mode-line-format
+        '(:left (sort symlink) :right (omit yank index)))
+  (setq dirvish-attributes           ; The order *MATTERS* for some attributes
+        '(vc-state subtree-state nerd-icons collapse git-msg file-time file-size)
+        dirvish-side-attributes
+        '(vc-state nerd-icons collapse file-size))
+  ;; open large directory (over 20000 files) asynchronously with `fd' command
+  (setq dirvish-large-directory-threshold 20000)
+  (setq dirvish-subtree-state-style 'nerd)
+  (setq dirvish-path-separators (list
+				 (format "  %s " (nerd-icons-codicon "nf-cod-home"))
+				 (format "  %s " (nerd-icons-codicon "nf-cod-root_folder"))
+				 (format " %s " (nerd-icons-faicon "nf-fa-angle_right"))))
+  (dirvish-peek-mode) ;; Preview files in minibuffer
+  (dirvish-side-follow-mode)
   
-  ;; 1. better listing format
-  (setq dired-listing-switches "-alh --group-directories-first")
+  :bind ; Bind `dirvish-fd|dirvish-side|dirvish-dwim' as you see fit
+  (("C-c f" . dirvish)
+   :map dirvish-mode-map               ; Dirvish inherits `dired-mode-map'
+   (";"   . dired-up-directory)        ; So you can adjust `dired' bindings here
+   ("?"   . dirvish-dispatch)          ; [?] a helpful cheatsheet
+   ("a"   . dirvish-setup-menu)        ; [a]ttributes settings:`t' toggles mtime, `f' toggles fullframe, etc.
+   ("f"   . dirvish-file-info-menu)    ; [f]ile info
+   ("o"   . dirvish-quick-access)      ; [o]pen `dirvish-quick-access-entries'
+   ("s"   . dirvish-quicksort)         ; [s]ort flie list
+   ("r"   . dirvish-history-jump)      ; [r]ecent visited
+   ("l"   . dirvish-ls-switches-menu)  ; [l]s command flags
+   ("v"   . dirvish-vc-menu)           ; [v]ersion control commands
+   ("*"   . dirvish-mark-menu)
+   ("y"   . dirvish-yank-menu)
+   ("N"   . dirvish-narrow)
+   ("^"   . dirvish-history-last)
+   ("TAB" . dirvish-subtree-toggle)
+   ("M-f" . dirvish-history-go-forward)
+   ("M-b" . dirvish-history-go-backward)
+   ("M-e" . dirvish-emerge-menu)))
 
-  ;; 2. Auto revert when files change
-  (setq global-auto-revert-non-file-buffers t)
-  (setq auto-revert-verbose nil)
-  (add-hook 'dired-mode-hook #'auto-revert-mode)
+(use-package media-progress-dirvish
+  :after dirvish
+  :config
+  (media-progress-dirvish-setup))
 
-  ;; 4. Hide details by default
-  (add-hook 'dired-mode-hook #'dired-hide-details-mode)
+(use-package dired-x
+  :config
+  ;; Make dired-omit-mode hide all "dotfiles"
+  (setq dired-omit-files
+	(concat dired-omit-files "\\|^\\..*$")))
 
-  ;; 5. Recursive operations without confirmation spam
-  (setq dired-recursive-copies 'always)
-  (setq dired-recursive-deletes 'top))
-
-(use-package dired-subtree
-  :after dired
-  :bind (:map dired-mode-map
-              ("TAB" . dired-subtree-toggle)))
+(use-package treemacs-nerd-icons
+  :config
+  (treemacs-nerd-icons-config))
 
 (use-package doom-modeline
   :custom
@@ -425,16 +471,16 @@
 	 (magit-post-refresh . #'diff-hl-magit-post-refresh)
 	 (dired-mode . diff-hl-dired-mode))) ;; Also show in dired buffers
 
-(use-package magit-todos
-  :after magit
-  :config (magit-todos-mode 1))
+(use-package envrc
+  :hook (after-init . envrc-global-mode))
 
 (use-package projectile
   :init
   (projectile-mode 1)
   
   :custom
-  (projectile-project-search-path '("~/Development/" "~/nixdots/"))
+  (projectile-project-search-path '("~/Development/"
+				    "~/nixdots/"))
   
   :bind (:map projectile-mode-map
 	      ("C-c p" . projectile-command-map)))
@@ -448,18 +494,30 @@
 (use-package lsp-mode
   :custom
   (lsp-keymap-prefix "C-c l")
+  (lsp-headerline-breadcrumb-icons-enable t)
+  
   :hook
-  ((nix-mode . lsp-deferred)
+  ((nix-ts-mode . lsp-deferred)
    (sh-mode . lsp-deferred)
+   (c-mode . lsp-deferred)
    
    (lsp-mode . lsp-enable-which-key-integration)) ;; Enable which key integration
   :commands (lsp lsp-deferred))
 
+;; optionally
+(use-package lsp-ui :commands lsp-ui-mode)
+
 (use-package nixfmt
-  :hook (nix-mode . nixfmt-on-save-mode))
+  :hook (nix-ts-mode . nixfmt-on-save-mode))
 
 (use-package shmft
   :hook (sh-mode . shfmt-on-save-mode))
+
+(use-package nix-ts-mode
+  :mode "\\.nix\\'"
+  :init
+  ;; Add to your init.el before loading nix-ts-mode
+  (setq treesit-font-lock-level 4))
 
 ;; TAB-only configuration
 (use-package corfu
@@ -719,22 +777,15 @@ targets."
     (defalias 'reader-current-doc-pagenumber
       #'reader-dyn--current-doc-pagenumber)))
 
-(use-package aria2
-  :custom
-  (aria2-download-directory (expand-file-name "~/Downloads/")))
-
 (use-package ready-player
-  :hook
-  (ready-player-major-mode . (lambda () (setq display-line-numbers-mode -1)))
+  :init
+  (ready-player-mode 1)
   :custom
-  ;; Know my music collection before hand.
-  (ready-player-my-media-collection-location "/home/krish/Music")
-
-  ;; Disable default bindings which is C-c m, occupied my manual-entry command
-  (ready-player-set-global-bindings nil)
-
-  ;; Cache metadata for faster startups
-  (ready-player-cache-metadata t)
-  (ready-player-cache-thumbnails t)
-  :config
-  (ready-player-mode +1))
+  (ready-player-thumbnail-max-pixel-height 200)
+  (ready-player-autoplay nil)
+  (ready-player-repeat t)
+  (ready-player-shuffle t)
+  (ready-player-open-playback-commands
+   '(
+     ("mpv" "--audio-display=no")
+     )))

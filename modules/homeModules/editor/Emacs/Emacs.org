@@ -217,9 +217,117 @@ Configure font sizes and types. Taken from [[https://systemcrafters.net/emacs-ti
 
 #+end_src
 
-** Dired
+** Dirvish
+
 #+begin_src emacs-lisp
 
+  (use-package dired
+    :config
+    (setq dired-listing-switches
+          "-l --almost-all --human-readable --group-directories-first --no-group")
+    ;; this command is useful when you want to close the window of `dirvish-side'
+    ;; automatically when opening a file
+    (put 'dired-find-alternate-file 'disabled nil))
+
+  (use-package dirvish
+    :ensure t
+    :init
+    (dirvish-override-dired-mode)
+    :custom
+    (dirvish-quick-access-entries ; It's a custom option, `setq' won't work
+     '(("h" "~/"                          "Home")
+       ("d" "~/Downloads/"                "Downloads")
+       ("m" "/mnt/"                       "Drives")
+       ("s" "/ssh:my-remote-server")      "SSH server"
+       ("e" "/sudo:root@localhost:/etc")  "Modify program settings"
+       ("t" "~/.local/share/Trash/files/" "TrashCan")))
+
+    :config
+    ;; (dirvish-peek-mode)             ; Preview files in minibuffer
+    ;; (dirvish-side-follow-mode)      ; similar to `treemacs-follow-mode'
+
+    (setq delete-by-moving-to-trash t) ;; does what it says
+    (setq dirvish-mode-line-format
+          '(:left (sort symlink) :right (omit yank index)))
+    (setq dirvish-attributes           ; The order *MATTERS* for some attributes
+          '(vc-state subtree-state nerd-icons collapse git-msg file-time file-size)
+          dirvish-side-attributes
+          '(vc-state nerd-icons collapse file-size))
+    ;; open large directory (over 20000 files) asynchronously with `fd' command
+    (setq dirvish-large-directory-threshold 20000)
+    (setq dirvish-subtree-state-style 'nerd)
+    (setq dirvish-path-separators (list
+  				 (format "  %s " (nerd-icons-codicon "nf-cod-home"))
+  				 (format "  %s " (nerd-icons-codicon "nf-cod-root_folder"))
+  				 (format " %s " (nerd-icons-faicon "nf-fa-angle_right"))))
+    (dirvish-peek-mode) ;; Preview files in minibuffer
+    (dirvish-side-follow-mode)
+    
+    :bind ; Bind `dirvish-fd|dirvish-side|dirvish-dwim' as you see fit
+    (("C-c f" . dirvish)
+     :map dirvish-mode-map               ; Dirvish inherits `dired-mode-map'
+     (";"   . dired-up-directory)        ; So you can adjust `dired' bindings here
+     ("?"   . dirvish-dispatch)          ; [?] a helpful cheatsheet
+     ("a"   . dirvish-setup-menu)        ; [a]ttributes settings:`t' toggles mtime, `f' toggles fullframe, etc.
+     ("f"   . dirvish-file-info-menu)    ; [f]ile info
+     ("o"   . dirvish-quick-access)      ; [o]pen `dirvish-quick-access-entries'
+     ("s"   . dirvish-quicksort)         ; [s]ort flie list
+     ("r"   . dirvish-history-jump)      ; [r]ecent visited
+     ("l"   . dirvish-ls-switches-menu)  ; [l]s command flags
+     ("v"   . dirvish-vc-menu)           ; [v]ersion control commands
+     ("*"   . dirvish-mark-menu)
+     ("y"   . dirvish-yank-menu)
+     ("N"   . dirvish-narrow)
+     ("^"   . dirvish-history-last)
+     ("TAB" . dirvish-subtree-toggle)
+     ("M-f" . dirvish-history-go-forward)
+     ("M-b" . dirvish-history-go-backward)
+     ("M-e" . dirvish-emerge-menu)))
+
+#+end_src
+
+
+*** Media Progrees in Dirvish
+
+Use [[https://github.com/jumper047/media-progress/tree/master][media-progress-dirvish]] to track media progress inside dirvish.
+
+#+begin_src emacs-lisp
+
+  (use-package media-progress-dirvish
+    :after dirvish
+    :config
+    (media-progress-dirvish-setup))
+
+#+end_src
+
+*** Hide Dotfiles
+
+#+begin_src emacs-lisp
+
+  (use-package dired-x
+    :config
+    ;; Make dired-omit-mode hide all "dotfiles"
+    (setq dired-omit-files
+  	(concat dired-omit-files "\\|^\\..*$")))
+
+#+end_src
+
+*** Treemacs
+#+begin_src emacs-lisp
+
+  (use-package treemacs-nerd-icons
+    :config
+    (treemacs-nerd-icons-config))
+
+#+end_src
+
+** Dired
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no
+:END:
+
+#+begin_src emacs-lisp
+  
   ;; use nerd fonts with dired 
   (use-package nerd-icons-dired
     :hook
@@ -227,7 +335,11 @@ Configure font sizes and types. Taken from [[https://systemcrafters.net/emacs-ti
 
   (use-package dired
     :hook
-    (dired-mode . dired-omit-mode)
+    (dired-mode . dired-omit-mode) ;; hide dotfiles 
+    :bind (:map dired-mode-map
+  		("." . dired-omit-mode)) ;; use "." to show dotfiles
+    :custom
+    (dired-omit-files (rx (seq bol "."))) ;; hide dotfiles
     :config
     ;; Let dired guess copy/move destinations
     (setq dired-dwim-target t)
@@ -259,6 +371,34 @@ Configure font sizes and types. Taken from [[https://systemcrafters.net/emacs-ti
 
 
 #+end_src
+
+*** Dired Collapse
+
+Shows a more github like rendering of directories where if a parent has only one child, then "parent/child" will be rendered.
+
+#+begin_src emacs-lisp
+
+  (use-package dired-collapse
+    :after dired
+    :init (global-dired-collapse-mode))
+
+#+end_src
+
+*** Dired Open
+
+Open files according to extensions.
+
+#+begin_src emacs-lisp
+
+  (use-package dired-open
+    :after dired
+    :custom
+    (dired-open-extensions
+     '(("mp4" . "mpv"))))
+
+#+end_src
+
+
 
 ** Doom Modeline
 #+begin_src emacs-lisp
@@ -692,13 +832,12 @@ We can use [[https://github.com/dgutov/diff-hl][diff-hl]] package to see git cha
 
 #+end_src
 
-*** Use Magit Todo
-Highlight todo keywords in magit.
+** Direnv Integration
+Integrate direnv with Emax
 #+begin_src emacs-lisp
 
-  (use-package magit-todos
-    :after magit
-    :config (magit-todos-mode 1))
+  (use-package envrc
+    :hook (after-init . envrc-global-mode))
 
 #+end_src
 
@@ -710,7 +849,8 @@ Highlight todo keywords in magit.
     (projectile-mode 1)
     
     :custom
-    (projectile-project-search-path '("~/Development/" "~/nixdots/"))
+    (projectile-project-search-path '("~/Development/"
+  				    "~/nixdots/"))
     
     :bind (:map projectile-mode-map
   	      ("C-c p" . projectile-command-map)))
@@ -740,12 +880,25 @@ I am using [[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]] for setting up ls
   (use-package lsp-mode
     :custom
     (lsp-keymap-prefix "C-c l")
+    (lsp-headerline-breadcrumb-icons-enable t)
+    
     :hook
-    ((nix-mode . lsp-deferred)
+    ((nix-ts-mode . lsp-deferred)
      (sh-mode . lsp-deferred)
+     (c-mode . lsp-deferred)
      
      (lsp-mode . lsp-enable-which-key-integration)) ;; Enable which key integration
     :commands (lsp lsp-deferred))
+
+#+end_src
+
+
+
+*** Lsp UI
+#+begin_src emacs-lisp
+
+  ;; optionally
+  (use-package lsp-ui :commands lsp-ui-mode)
 
 #+end_src
 
@@ -756,7 +909,7 @@ Use [[https://github.com/purcell/emacs-nixfmt][nixfmt]] package for formatting n
 #+begin_src emacs-lisp
 
   (use-package nixfmt
-    :hook (nix-mode . nixfmt-on-save-mode))
+    :hook (nix-ts-mode . nixfmt-on-save-mode))
   
 #+end_src
 
@@ -767,6 +920,18 @@ Use [[https://github.com/purcell/emacs-shfmt][shfmt]] package for formatting she
   (use-package shmft
     :hook (sh-mode . shfmt-on-save-mode))
   
+#+end_src
+
+**** Treesitter
+
+#+begin_src emacs-lisp
+
+  (use-package nix-ts-mode
+    :mode "\\.nix\\'"
+    :init
+    ;; Add to your init.el before loading nix-ts-mode
+    (setq treesit-font-lock-level 4))
+
 #+end_src
 
 ** Auto-Completion
@@ -1112,16 +1277,6 @@ Use the new [[https://codeberg.org/MonadicSheep/emacs-reader][emacs-reader]] pac
 
 #+end_src
 
-* Aria2 Downloader
-[[https://github.com/ukaszg/aria2][aria2]] is a emacs package for emacs as a frontend aria2 process listing helper.
-#+begin_src emacs-lisp
-
-      (use-package aria2
-        :custom
-        (aria2-download-directory (expand-file-name "~/Downloads/")))
-      
-    #+end_src
-
 * TODO Elfeed Setup
 Elfeed is a rss reader for emacs.
 
@@ -1142,20 +1297,17 @@ There's another one more presentable: [[https://github.com/xenodium/ready-player
 #+begin_src emacs-lisp
 
   (use-package ready-player
-    :hook
-    (ready-player-major-mode . (lambda () (setq display-line-numbers-mode -1)))
+    :init
+    (ready-player-mode 1)
     :custom
-    ;; Know my music collection before hand.
-    (ready-player-my-media-collection-location "/home/krish/Music")
-
-    ;; Disable default bindings which is C-c m, occupied my manual-entry command
-    (ready-player-set-global-bindings nil)
-
-    ;; Cache metadata for faster startups
-    (ready-player-cache-metadata t)
-    (ready-player-cache-thumbnails t)
-    :config
-    (ready-player-mode +1))
+    (ready-player-thumbnail-max-pixel-height 200)
+    (ready-player-autoplay nil)
+    (ready-player-repeat t)
+    (ready-player-shuffle t)
+    (ready-player-open-playback-commands
+     '(
+       ("mpv" "--audio-display=no")
+       )))
 
 #+end_src
 

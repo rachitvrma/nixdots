@@ -35,6 +35,18 @@
       stylix = {
         enable = true;
 
+        # Overall opacity settings
+        opacity =
+          let
+            val = 0.9;
+          in
+          {
+            applications = val;
+            desktop = val;
+            popups = val;
+            terminal = val;
+          };
+
         # Obviously Cattppuccin
         /*
           image = (
@@ -68,9 +80,8 @@
         # A great CAT themed wallpaper
         image = (
           pkgs.fetchurl {
-            url = "https://raw.githubusercontent.com/rachitvrma/Wallpapers/main/cats-sunrise-anime.jpg";
-
-            hash = "sha256-7rH93pv3CEVg0pzDqsXwzcUcYoWw6U27wc2b7mEundc=";
+            url = "https://gruvbox-wallpapers.pages.dev/wallpapers/mix/platform.jpg";
+            hash = "sha256-ZQsr2w8vzwPrWvaU7sAE69d8ouetpwe8nkBKeIGx58U=";
           }
         );
 
@@ -129,11 +140,6 @@
             platform = "qtct";
             standardDialogs = "xdgdesktopportal";
           };
-        };
-
-        opacity = {
-          terminal = 0.89;
-          popups = 0.9;
         };
       };
     };
